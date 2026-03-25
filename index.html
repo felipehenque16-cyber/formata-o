@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FC'12 Style Kit Generator</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --panel-color: #2d2d2d;
+            --accent-color: #007bff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            background: var(--panel-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* O segredo do FC'12: Camadas sobrepostas */
+        #kit-preview {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            background-color: #eee; /* Cor base da camisa */
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #kit-preview img, #kit-preview .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Camada de sombra (Multiplicação) para dar o efeito FC'12 */
+        .shadow-layer {
+            z-index: 10;
+            mix-blend-mode: multiply;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 250px;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 12px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <h1>FC'12 Minikit Designer</h1>
+
+    <div class="container">
+        <div id="kit-preview">
+            <div id="base-color" class="layer" style="background-color: #ffffff;"></div>
+            
+            <img src="https://i.imgur.com/5uY8f9G.png" class="shadow-layer" alt="Template Shadow">
+            
+            <img id="logo-preview" src="" class="layer" style="display:none;">
+        </div>
+
+        <div class="controls">
+            <label>Cor da Camisa:</label>
+            <input type="color" id="colorPicker" value="#ffffff">
+
+            <label>Upload Escudo (PNG):</label>
+            <input type="file" id="logoUpload" accept="image/*">
+
+            <button onclick="downloadKit()">Baixar Kit (.PNG)</button>
+        </div>
+    </div>
+
+    <script>
+        // Alterar cor em tempo real
+        const colorPicker = document.getElementById('colorPicker');
+        const baseColor = document.getElementById('base-color');
+
+        colorPicker.addEventListener('input', (e) => {
+            baseColor.style.backgroundColor = e.target.value;
+        });
+
+        // Upload de Logo
+        const logoUpload = document.getElementById('logoUpload');
+        const logoPreview = document.getElementById('logo-preview');
+
+        logoUpload.addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                logoPreview.src = event.target.result;
+                logoPreview.style.display = 'block';
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        function downloadKit() {
+            alert('Para download real, usaríamos a biblioteca html2canvas aqui!');
+        }
+    </script>
+</body>
+</html>
