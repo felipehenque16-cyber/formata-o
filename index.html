@@ -1,74 +1,148 @@
-
 <!DOCTYPE html>
-<html lang="en">
-
-
+<html lang="pt-br">
 <head>
-    <title>FM Minikit Generator</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Gerador Profissional FC'12</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --panel-bg: #222;
+            --text-color: #eee;
+            --button-color: #28a745;
+        }
 
-    <!-- <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="FM Minikit Generator" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" /> -->
+        body {
+            background-color: #111;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
 
-    <meta content='Quickly create 2D minikits for FM' name='description' />
+        /* 1. O Container do Preview (Proporção 420x420 do FC'12) */
+        .preview-area {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            margin: 20px auto;
+            border: 3px solid #444;
+            /* Fundo de exemplo para ver a transparência */
+            background: url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            overflow: hidden;
+            border-radius: 8px;
+        }
 
-    <meta content='FM Minikit Generator' property='og:title' />
-    <meta content='article' property='og:type' />
-    <meta content='FIFA Kit Creator' property='og:site_name' />
-    <meta content='https://fmkitcreator.com/tools/minikit-generator/' property='og:url' />
-    <meta content='https://fmkitcreator.com/tools/minikit-generator/image.jpg' property='og:image' />
-    <meta content='Quickly create 2D minikits for FM' property='og:description' />
-    <!-- <meta content='https://www.facebook.com/pesmastersite' property='article:publisher' /> -->
+        /* 2. Camada 1: A Cor Base (Com Máscara de Recorte) */
+        #camada-cor {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            
+            /* --- IMPORTANTE: SUA AÇÃO É AQUI! --- */
+            /* Link para o PNG da Máscara de Corpo do Template FC'12 (Preto sólido no formato da camisa) */
+            -webkit-mask-image: url('INSIRA_AQUI_A_URL_DO_PNG_DA_MASCARA_DE_CORPO'); 
+            mask-image: url('INSIRA_AQUI_A_URL_DO_PNG_DA_MASCARA_DE_CORPO');
+            
+            -webkit-mask-size: contain; mask-size: contain;
+            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+            -webkit-mask-position: center; mask-position: center;
+        }
 
-    <meta content='FM Minikit Generator' property='twitter:title' />
-    <meta content='https://fmkitcreator.com/tools/minikit-generator/image.jpg' property='twitter:image' />
-    <meta content='summary_large_image' property='twitter:card' />
-    <meta content='Quickly create 2D minikits for FM' property='twitter:description' />
-    <meta content='@fifakitcreator' property='twitter:site' />
-    <meta content='@fifakitcreator' property='twitter:creator' />
-    <meta content='fifakitcreator.com' property='twitter:domain' />
+        /* 3. Camada 2: Sombras e Dobras (Essencial para o FC'12) */
+        #camada-sombra {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            
+            /* --- IMPORTANTE: SUA AÇÃO É AQUI! --- */
+            /* Link para o PNG de Sombra do Template FC'12 */
+            content: url('INSIRA_AQUI_A_URL_DO_PNG_DE_SOMBRA'); 
 
-    
-    <!-- <link rel="shortcut icon" sizes="196x196" href="https://www.pesmaster.com/graphics/icon/icon_196.png">
-    <link rel="shortcut icon" sizes="128x128" href="https://www.pesmaster.com/graphics/icon/icon_128.png">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://www.pesmaster.com/graphics/icon/icon_144.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://www.pesmaster.com/graphics/icon/icon_114.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://www.pesmaster.com/graphics/icon/icon_72.png">
-    <link rel="apple-touch-icon-precomposed" href="https://www.pesmaster.com/graphics/icon/icon_57.png"> -->
-    <link href='/kit-creator/favicon_fm.png' rel='icon' type='image/png' />
+            mix-blend-mode: multiply; /* Faz a sombra se misturar com a cor */
+            object-fit: contain;
+        }
 
-    <!-- <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script> -->
-    <script type="text/javascript" src="/js/sha512.js"></script>
-    <script type="text/javascript" src="/js/forms.js"></script>
+        /* 4. Camada 3: Escudo e Logos */
+        #escudo-layer {
+            position: absolute;
+            z-index: 3;
+            /* Posicionamento padrão para o modelo FC'12 */
+            width: 80px; /* Tamanho do escudo */
+            top: 28%; /* Alinhamento vertical */
+            right: 25%; /* Alinhamento horizontal (ao lado do peito) */
+        }
 
-    
-    
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
+        .controls {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
 
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5722789279541063" crossorigin="anonymous"></script>
-    
-    </head>
+        input, button { margin: 10px; padding: 12px; border-radius: 6px; border: none; font-size: 16px; }
+        button { background-color: var(--button-color); color: white; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
 <body>
-            <div id="app"></div>
-        <script type="module" crossorigin src="/tools/minikit-generator/dist/index-BLXeaokf.js"></script>
-<link rel="stylesheet" crossorigin href="/tools/minikit-generator/dist/index-Kp-hnMOt.css">
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-BJP8DLZ3TM"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
+    <h2>Configurador de Kit Profissional FC'12</h2>
 
-    function gtag() {
-        dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
+    <div id="fc12-canvas" class="preview-area">
+        <div id="camada-cor" style="background-color: #ff0000;"></div>
+        <img id="camada-sombra" crossorigin="anonymous">
+        <img id="escudo-layer" src="" style="display:none;" crossorigin="anonymous">
+    </div>
 
-    gtag('config', "G-BJP8DLZ3TM");
-</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"16df3080c6444d09b2b04e683c5d677f","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+    <div class="controls">
+        <label>Cor Principal:</label>
+        <input type="color" id="picker-cor" value="#ff0000"><br>
+        
+        <label>Escudo (PNG Transparente):</label>
+        <input type="file" id="picker-escudo" accept="image/*"><br>
+        
+        <button onclick="downloadKitFinal()">BAIXAR KIT PRONTO (.PNG)</button>
+    </div>
+
+    <script>
+        const pickerCor = document.getElementById('picker-cor');
+        const camadaCor = document.getElementById('camada-cor');
+        const pickerEscudo = document.getElementById('picker-escudo');
+        const escudoLayer = document.getElementById('escudo-layer');
+
+        // Lógica de Cor
+        pickerCor.addEventListener('input', (e) => camadaCor.style.backgroundColor = e.target.value);
+
+        // Lógica de Escudo (Lê o arquivo enviado e mostra na camisa)
+        pickerEscudo.addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                escudoLayer.src = event.target.result;
+                escudoLayer.style.display = 'block';
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        // Função de Download
+        function downloadKitFinal() {
+            const area = document.getElementById('fc12-canvas');
+            
+            // html2canvas tira uma "foto" da sua div, respeitando as camadas e misturas
+            html2canvas(area, {
+                useCORS: true, // Importante para imagens externas
+                backgroundColor: null, // Mantém o fundo transparente
+                scale: 1 // Resolução original
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'kit_fc12_gerado.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
 </body>
-
 </html>
