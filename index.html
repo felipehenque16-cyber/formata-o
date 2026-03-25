@@ -1,53 +1,109 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Kit FC'12</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { background: #111; color: #fff; font-family: sans-serif; text-align: center; }
+        
+        /* O segredo: Container com tamanho exato do FC'12 (420x420) */
+        .preview-container {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); /* Fundo apenas para ver */
+        }
 
-<div class="container">
-    <div id="kit-preview">
-        <div id="base-color" class="layer" style="background-color: #ffffff;"></div>
-        <img src="https://i.imgur.com/5uY8f9G.png" class="shadow-layer" id="template-shadow" crossorigin="anonymous">
-        <img id="logo-preview" class="layer" style="display:none; width: 80px; height: 80px; top: 30%; left: 60%;">
+        /* Camada 1: A Cor (Base) */
+        #camada-cor {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* Máscara: Isso faz a cor ficar SÓ dentro do desenho da camisa */
+            -webkit-mask-image: url('https://i.imgur.com/vHq0A66.png'); 
+            mask-image: url('https://i.imgur.com/vHq0A66.png');
+            -webkit-mask-size: contain;
+            mask-size: contain;
+        }
+
+        /* Camada 2: Sombras e Dobras (O arquivo real do FC'12) */
+        #camada-shadow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            mix-blend-mode: multiply; /* Faz a sombra "entrar" na cor */
+        }
+
+        /* Camada 3: Escudo */
+        #escudo-img {
+            position: absolute;
+            z-index: 3;
+            width: 70px;
+            top: 130px;
+            right: 110px;
+        }
+
+        .controls { background: #222; padding: 20px; border-radius: 10px; display: inline-block; }
+        input, button { margin: 10px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>Configurador de Kit Estilo FC'12</h2>
+
+    <div id="export-area" class="preview-container">
+        <div id="camada-cor" style="background-color: #ff0000;"></div>
+        
+        <img id="camada-shadow" src="https://i.imgur.com/5uY8f9G.png" crossorigin="anonymous">
+        
+        <img id="escudo-img" src="" style="display:none;" crossorigin="anonymous">
     </div>
 
     <div class="controls">
-        <label>Cor da Camisa:</label>
-        <input type="color" id="colorPicker" value="#ffffff">
-
-        <label>Escudo (PNG):</label>
-        <input type="file" id="logoUpload" accept="image/*">
-
-        <button onclick="downloadKit()">Baixar Kit FC'12</button>
-    </div>
-</div>
-
-<script>
-    // Lógica de cores e upload (mesma de antes)
-    const colorPicker = document.getElementById('colorPicker');
-    const baseColor = document.getElementById('base-color');
-    colorPicker.addEventListener('input', (e) => baseColor.style.backgroundColor = e.target.value);
-
-    const logoUpload = document.getElementById('logoUpload');
-    const logoPreview = document.getElementById('logo-preview');
-    logoUpload.addEventListener('change', function(e) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            logoPreview.src = event.target.result;
-            logoPreview.style.display = 'block';
-        }
-        reader.readAsDataURL(e.target.files[0]);
-    });
-
-    // --- FUNÇÃO DE DOWNLOAD REAL ---
-    function downloadKit() {
-        const preview = document.getElementById('kit-preview');
+        <label>Cor Principal:</label>
+        <input type="color" id="picker" value="#ff0000"><br>
         
-        html2canvas(preview, {
-            useCORS: true, // Permite carregar imagens de outros domínios
-            backgroundColor: null, // Mantém o fundo transparente se a div for transparente
-            scale: 2 // Dobra a resolução para ficar nítido no FM
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'minikit_fc12.png';
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-        });
-    }
-</script>
+        <label>Subir Escudo:</label>
+        <input type="file" id="upload" accept="image/*"><br>
+        
+        <button onclick="salvarKit()" style="background: #28a745; color: white; border: none;">BAIXAR KIT PRONTO</button>
+    </div>
+
+    <script>
+        const picker = document.getElementById('picker');
+        const camadaCor = document.getElementById('camada-cor');
+        const upload = document.getElementById('upload');
+        const escudo = document.getElementById('escudo-img');
+
+        // Mudar cor
+        picker.oninput = () => camadaCor.style.backgroundColor = picker.value;
+
+        // Upload do Escudo
+        upload.onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                escudo.src = event.target.result;
+                escudo.style.display = 'block';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        // Função de Salvar
+        function salvarKit() {
+            const area = document.getElementById('export-area');
+            html2canvas(area, { backgroundColor: null, scale: 1 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'kit_fc12.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
